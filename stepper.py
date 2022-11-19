@@ -1,9 +1,10 @@
 import RPi.GPIO as GPIO, time
 
 class Motor:
-    def __init__(self, step_pin, dir_pin):
+    def __init__(self, step_pin, dir_pin, deg_p_step = 0.225):
         self.step_pin = step_pin
         self.dir_pin = dir_pin
+        self.deg_p_step = deg_p_step
         GPIO.setup(self.step_pin, GPIO.OUT)
         GPIO.setup(self.dir_pin, GPIO.OUT)
         GPIO.setwarnings(False)
@@ -11,12 +12,27 @@ class Motor:
 
     def spin(self, steps, direction):
         GPIO.output(self.dir_pin, direction)
+        max_speed = 1000
+        speed= 30
         while(steps >= 0):
             GPIO.output(self.step_pin, True)
-            time.sleep(1/300.0)
+            time.sleep(1.0/speed)
             GPIO.output(self.step_pin, False)
             steps -= 1
+            # Ramping logic
+            if(speed < max_speed):
+                speed += 10
+            elif(steps < 100 and speed > 5):
+                speed -= 20
 
+    # given a degree (+/- 360) 
+    def rotate(self, degrees):
+        steps = degrees // self.deg_p_step
+        # truncate spins over 360 degrees
+        #steps %= 360 // self.deg_p_step 
+        self.spin(abs(steps), degrees > 0)
+        return (steps * self.deg_p_step)
+ 
 
 
 if __name__=="__main__":
