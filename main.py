@@ -7,6 +7,7 @@ from stepper import Motor
 import numpy as np
 
 # This function will rotate the motors, recording the angles and the distance as we go.
+# returns np array with rho, phi and rad
 def spin_routine(ma, mb, us):
     iteration = 0
     step_increment = 10
@@ -40,7 +41,7 @@ def spin_routine(ma, mb, us):
 
     print(len(rho), len(phi), len(rad))
     array = np.array([rho, phi, rad], dtype=float)
-    print(array)
+    return array.T
 
 
 if __name__ == "__main__":
@@ -64,7 +65,8 @@ if __name__ == "__main__":
     ultrasonic = Ultrasonic(trig_pin, echo_pin)
     print(ultrasonic.get_distance())
 
-    spin_routine(motor_a, motor_b, ultrasonic)
+    array = spin_routine(motor_a, motor_b, ultrasonic)
+    np.savetxt("test.csv", array, delimiter=",")
 
     io.output(motor_enable, True)
     io.cleanup()
