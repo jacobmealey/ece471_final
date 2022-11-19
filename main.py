@@ -4,6 +4,7 @@ import time
 import RPi.GPIO as io
 from hc_sr04 import Ultrasonic
 from stepper import Motor
+from sph_to_mesh import write_xyz
 import numpy as np
 
 # This function will rotate the motors, recording the angles and the distance as we go.
@@ -66,7 +67,8 @@ if __name__ == "__main__":
     print(ultrasonic.get_distance())
 
     array = spin_routine(motor_a, motor_b, ultrasonic)
-    np.savetxt("test.csv", array, delimiter=",")
+    #np.savetxt("test.csv", array, delimiter=",")
+    write_xyz("test.xyz", array)
 
     io.output(motor_enable, True)
     io.cleanup()
