@@ -7,7 +7,7 @@ import numpy as np
 # theta is the angle the rho vector forms with the x axis; 0 <= theta < 2pi
 # phi is the angle the rho vector forms with the z axis; 0 <= phi < pi
 
-def sph_to_xyz(rho, phi, theta):
+def sph_to_xyz(rho, theta, phi):
     x = rho*math.sin(phi*(math.pi/180))*math.cos(theta*(math.pi/180))
     y = rho*math.sin(phi*(math.pi/180))*math.sin(theta*(math.pi/180))
     z = rho*math.cos(phi*(math.pi/180))

@@ -8,40 +8,40 @@ from sph_to_mesh import write_xyz
 import numpy as np
 
 # This function will rotate the motors, recording the angles and the distance as we go.
-# returns np array with rho, phi and rad
+# returns np array with rho, theta, phi
 def spin_routine(ma, mb, us):
     iteration = 0
     step_increment = 10
-    direction_rho = 1
+    direction_theta = 1
     direction_phi = 1
 
     rho = []
+    theta = []
     phi = []
-    rad = []
 
-    rho.append(0)
+    rho.append(us.get_distance())
+    theta.append(0)
     phi.append(0)
-    rad.append(us.get_distance())
 
     while(iteration != 100):
-        rad.append(us.get_distance())
-        rho.append(rho[-1] + mb.rotate(step_increment * direction_rho))
+        rho.append(us.get_distance())
+        theta.append(theta[-1] + mb.rotate(step_increment * direction_theta))
         phi.append(phi[-1])
-        print(iteration, rho[-1], phi[-1], rad[-1])
+        print(iteration, rho[-1], theta[-1], phi[-1])
 
-        if(rho[-1] > 180 or rho[-1] < 0):
-            direction_rho *= -1
+        if(theta[-1] > 180 or theta[-1] < 0):
+            direction_theta *= -1
             phi.append(phi[-1] + ma.rotate(step_increment * direction_phi))
-            rho.append(rho[-1] + mb.rotate(step_increment * direction_rho))
-            rad.append(us.get_distance())
+            theta.append(theta[-1] + mb.rotate(step_increment * direction_theta))
+            rho.append(us.get_distance())
 
         if(phi[-1] > 180 or phi[-1] < 0):
             direction_phi *= -1
 
         iteration += 1
 
-    print(len(rho), len(phi), len(rad))
-    array = np.array([rho, phi, rad], dtype=float)
+    print(len(rho), len(theta), len(phi))
+    array = np.array([rho, theta, phi], dtype=float)
     return array.T
 
 
