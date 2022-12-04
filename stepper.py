@@ -22,7 +22,7 @@ class Motor:
             # Ramping logic
             if(speed < max_speed):
                 speed += 10
-            elif(steps < 100 and speed > 5):
+            elif(steps < 50 and speed > 5):
                 speed -= 20
 
     # given a degree (+/- 360) 

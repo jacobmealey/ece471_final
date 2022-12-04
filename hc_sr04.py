@@ -24,11 +24,19 @@ class Ultrasonic:
         io.output(self.trig_pin, False)
     
         t_1 = time.time()
+        intial_time = t_1
         t_2 = time.time()
     
         # stops recording the time "as soon as" echo goes high 
         while io.input(self.echo_pin) == 0:
             t_1 = time.time()
+            # try pulse again if missed
+            if(t_1 - intial_time > 1):
+                initial_time = time.time()
+                io.output(self.trig_pin, True)
+                time.sleep(10e-6)
+                io.output(self.trig_pin, False)
+
     
         # save time of the end of the pulse
         while io.input(self.echo_pin) == 1:

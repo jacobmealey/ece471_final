@@ -11,7 +11,11 @@ import numpy as np
 # returns np array with rho, theta, phi
 def spin_routine(ma, mb, us):
     iteration = 0
-    step_increment = 10
+    step_increment = 5.0
+    total_steps = 1600.0
+    degrees_per_step = 360 / total_steps
+    sample_size = int((180/(step_increment*degrees_per_step)) * (90/(step_increment*degrees_per_step)))
+    sample_size = 3*sample_size
     direction_theta = 1
     direction_phi = 1
 
@@ -23,21 +27,43 @@ def spin_routine(ma, mb, us):
     theta.append(0)
     phi.append(0)
 
-    while(iteration != 100):
-        rho.append(us.get_distance())
-        theta.append(theta[-1] + mb.rotate(step_increment * direction_theta))
-        phi.append(phi[-1])
-        print(iteration, rho[-1], theta[-1], phi[-1])
+    print(sample_size)
+    
+    prev_phi = 0
+    prev_rho = 0
+    prev_the = 0
 
-        if(theta[-1] > 180 or theta[-1] < 0):
-            direction_theta *= -1
-            phi.append(phi[-1] + ma.rotate(step_increment * direction_phi))
-            theta.append(theta[-1] + mb.rotate(step_increment * direction_theta))
-            rho.append(us.get_distance())
+    while(iteration != sample_size):
+        io.output(motor_enable, False)
+        # Movement logic - theta always spins from 0 - 360, when 
+        # theta changes direction we increment phi which only goes
+        # from 0 - 90
+        if(prev_the > 360):
+            direction_theta = -1
+            prev_phi +=  ma.rotate(step_increment * direction_phi)
+        elif (prev_the < 0):
+            direction_theta = 1
+            prev_phi +=  ma.rotate(step_increment * direction_phi)
 
-        if(phi[-1] > 180 or phi[-1] < 0):
-            direction_phi *= -1
+        if(prev_phi > 90):
+            direction_phi = -1
+        if(prev_phi < 0):
+            direction_phi = 1
 
+        prev_the +=  mb.rotate(step_increment * direction_theta)
+
+
+        # disable motor for reading sensor -- EMF sad :)
+        io.output(motor_enable, True)
+        prev_rho = us.get_distance()
+        io.output(motor_enable, False)
+        # if the distance is over 60 it's in the noise
+        if(prev_rho < 50):
+            rho.append(prev_rho)
+            theta.append(prev_the)
+            phi.append(prev_phi)
+            print(iteration, rho[-1], theta[-1], phi[-1])
+        time.sleep(0.24)
         iteration += 1
 
     print(len(rho), len(theta), len(phi))
@@ -56,8 +82,8 @@ if __name__ == "__main__":
     motor_enable = 2
 
     io.setmode(io.BCM)
+    io.cleanup()
     io.setup(motor_enable, io.OUT)
-    io.output(motor_enable, False)
 
     time.sleep(0.5)
 
